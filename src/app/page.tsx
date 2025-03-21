@@ -73,109 +73,25 @@ type AttributeMatch = "exact" | "close" | "wrong" | "hidden";
 interface AttributeState {
   value: string | number | boolean | string[];
   match: AttributeMatch;
-  direction?: "up" | "down" | null; // For numeric values like year
+  direction?: "up" | "down" | null;
 }
 
-// Matrix Rain Effect Component
-// function MatrixRain() {
-//   const canvasRef = useRef<HTMLCanvasElement>(null);
-
-//   useEffect(() => {
-//     const canvas = canvasRef.current;
-//     if (!canvas) return;
-
-//     const ctx = canvas.getContext("2d");
-//     if (!ctx) return;
-
-//     // Set canvas dimensions
-//     const resizeCanvas = () => {
-//       canvas.width = window.innerWidth;
-//       canvas.height = window.innerHeight;
-//     };
-
-//     resizeCanvas();
-//     window.addEventListener("resize", resizeCanvas);
-
-//     // Matrix characters (using a mix of katakana, latin and digits)
-//     const chars =
-//       "アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-//     const charArray = chars.split("");
-
-//     // Create drops
-//     const fontSize = 14;
-//     const columns = Math.floor(canvas.width / fontSize);
-//     const drops: number[] = [];
-
-//     // Initialize drops
-//     for (let i = 0; i < columns; i++) {
-//       drops[i] = Math.floor(Math.random() * -canvas.height);
-//     }
-
-//     // Drawing function
-//     const draw = () => {
-//       // Add semi-transparent black rectangle on top of previous frame
-//       ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-//       ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-//       // Set text color and font
-//       ctx.fillStyle = "#0F0"; // Bright green
-//       ctx.font = `${fontSize}px monospace`;
-
-//       // Draw characters
-//       for (let i = 0; i < drops.length; i++) {
-//         // Random character
-//         const char = charArray[Math.floor(Math.random() * charArray.length)];
-
-//         // Draw character
-//         const x = i * fontSize;
-//         const y = drops[i] * fontSize;
-
-//         // Add glow effect
-//         ctx.shadowColor = "#0F0";
-//         ctx.shadowBlur = 10;
-//         ctx.fillText(char, x, y);
-//         ctx.shadowBlur = 0;
-
-//         // Move drop down
-//         drops[i]++;
-
-//         // Reset drop if it reaches bottom or randomly
-//         if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-//           drops[i] = Math.floor(Math.random() * -20);
-//         }
-//       }
-//     };
-
-//     // Animation loop
-//     const interval = setInterval(draw, 50);
-
-//     return () => {
-//       clearInterval(interval);
-//       window.removeEventListener("resize", resizeCanvas);
-//     };
-//   }, []);
-
-//   return (
-//     <canvas
-//       ref={canvasRef}
-//       className="fixed left-0 top-0 -z-10 h-full w-full opacity-20"
-//     />
-//   );
-// }
+interface Command {
+  text: string;
+  type: "command" | "error" | "success" | "info" | "warning";
+}
 
 export default function ProgrammingLanguageGame() {
   const [guess, setGuess] = useState("");
   const [targetLanguage, setTargetLanguage] = useState(languages[0]);
   const [gameWon, setGameWon] = useState(false);
   const [attempts, setAttempts] = useState(0);
-  const [commandHistory, setCommandHistory] = useState<
-    {
-      text: string;
-      type: "command" | "error" | "success" | "info" | "warning";
-    }[]
-  >([]);
+
+  const [commandHistory, setCommandHistory] = useState<Command[]>([]);
+
   const inputRef = useRef<HTMLInputElement>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
+
   const [attributes, setAttributes] = useState<Record<string, AttributeState>>({
     paradigm: { value: [], match: "hidden" },
     typing: { value: "", match: "hidden" },
@@ -187,10 +103,8 @@ export default function ProgrammingLanguageGame() {
 
   const lastMessageRef = useRef<HTMLDivElement>(null);
 
-  // Initialize a new game
   useEffect(() => {
     startNewGame();
-    // Add initial terminal messages
     setCommandHistory([
       { text: "$ ./language-guesser", type: "command" },
       { text: "Initializing language database...", type: "info" },
@@ -206,13 +120,12 @@ export default function ProgrammingLanguageGame() {
   }, []);
 
   useEffect(() => {
-    // Smooth scroll to the bottom when command history changes
     if (lastMessageRef.current) {
       lastMessageRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [commandHistory]);
 
-  const startNewGame = () => {
+  function startNewGame() {
     const randomIndex = Math.floor(Math.random() * languages.length);
     setTargetLanguage(languages[randomIndex]);
     setGameWon(false);
@@ -237,7 +150,7 @@ export default function ProgrammingLanguageGame() {
     if (inputRef.current) {
       inputRef.current.focus();
     }
-  };
+  }
 
   const handleGuess = () => {
     if (!guess.trim()) return;
@@ -532,9 +445,9 @@ export default function ProgrammingLanguageGame() {
                           <Check className="inline h-5 w-5 text-green-500 drop-shadow-[0_0_3px_rgba(34,197,94,0.7)]" />
                         )}
                         {match === "close" && (
-                          <div className="ml-1.5 bg-yellow-900/70 px-1.5 text-xs text-yellow-400">
-                            ≈
-                          </div>
+                          <Badge className="ml-1.5 bg-yellow-700 px-[5px]">
+                            <span className="translate-y-[2px] text-xs">≈</span>
+                          </Badge>
                         )}
                         {match === "wrong" && (
                           <X className="inline h-5 w-5 text-red-500 drop-shadow-[0_0_3px_rgba(239,68,68,0.7)]" />
@@ -582,3 +495,90 @@ export default function ProgrammingLanguageGame() {
     </div>
   );
 }
+
+// Matrix Rain Effect Component
+// function MatrixRain() {
+//   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+//   useEffect(() => {
+//     const canvas = canvasRef.current;
+//     if (!canvas) return;
+
+//     const ctx = canvas.getContext("2d");
+//     if (!ctx) return;
+
+//     // Set canvas dimensions
+//     const resizeCanvas = () => {
+//       canvas.width = window.innerWidth;
+//       canvas.height = window.innerHeight;
+//     };
+
+//     resizeCanvas();
+//     window.addEventListener("resize", resizeCanvas);
+
+//     // Matrix characters (using a mix of katakana, latin and digits)
+//     const chars =
+//       "アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+//     const charArray = chars.split("");
+
+//     // Create drops
+//     const fontSize = 14;
+//     const columns = Math.floor(canvas.width / fontSize);
+//     const drops: number[] = [];
+
+//     // Initialize drops
+//     for (let i = 0; i < columns; i++) {
+//       drops[i] = Math.floor(Math.random() * -canvas.height);
+//     }
+
+//     // Drawing function
+//     const draw = () => {
+//       // Add semi-transparent black rectangle on top of previous frame
+//       ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+//       ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+//       // Set text color and font
+//       ctx.fillStyle = "#0F0"; // Bright green
+//       ctx.font = `${fontSize}px monospace`;
+
+//       // Draw characters
+//       for (let i = 0; i < drops.length; i++) {
+//         // Random character
+//         const char = charArray[Math.floor(Math.random() * charArray.length)];
+
+//         // Draw character
+//         const x = i * fontSize;
+//         const y = drops[i] * fontSize;
+
+//         // Add glow effect
+//         ctx.shadowColor = "#0F0";
+//         ctx.shadowBlur = 10;
+//         ctx.fillText(char, x, y);
+//         ctx.shadowBlur = 0;
+
+//         // Move drop down
+//         drops[i]++;
+
+//         // Reset drop if it reaches bottom or randomly
+//         if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+//           drops[i] = Math.floor(Math.random() * -20);
+//         }
+//       }
+//     };
+
+//     // Animation loop
+//     const interval = setInterval(draw, 50);
+
+//     return () => {
+//       clearInterval(interval);
+//       window.removeEventListener("resize", resizeCanvas);
+//     };
+//   }, []);
+
+//   return (
+//     <canvas
+//       ref={canvasRef}
+//       className="fixed left-0 top-0 -z-10 h-full w-full opacity-20"
+//     />
+//   );
+// }
