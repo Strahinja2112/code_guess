@@ -81,6 +81,15 @@ interface Command {
   type: "command" | "error" | "success" | "info" | "warning";
 }
 
+const DEFAULT_ATTRIBUTES: Record<string, AttributeState> = {
+  paradigm: { value: [], match: "hidden" },
+  typing: { value: "", match: "hidden" },
+  garbageCollection: { value: false, match: "hidden" },
+  designedBy: { value: "", match: "hidden" },
+  firstAppeared: { value: 0, match: "hidden" },
+  mainUseCase: { value: "", match: "hidden" },
+};
+
 export default function ProgrammingLanguageGame() {
   const [guess, setGuess] = useState("");
   const [targetLanguage, setTargetLanguage] = useState(languages[0]);
@@ -92,14 +101,7 @@ export default function ProgrammingLanguageGame() {
   const inputRef = useRef<HTMLInputElement>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
 
-  const [attributes, setAttributes] = useState<Record<string, AttributeState>>({
-    paradigm: { value: [], match: "hidden" },
-    typing: { value: "", match: "hidden" },
-    garbageCollection: { value: false, match: "hidden" },
-    designedBy: { value: "", match: "hidden" },
-    firstAppeared: { value: 0, match: "hidden" },
-    mainUseCase: { value: "", match: "hidden" },
-  });
+  const [attributes, setAttributes] = useState(DEFAULT_ATTRIBUTES);
 
   const lastMessageRef = useRef<HTMLDivElement>(null);
 
@@ -125,20 +127,13 @@ export default function ProgrammingLanguageGame() {
     }
   }, [commandHistory]);
 
-  function startNewGame() {
+  function startNewGame(): void {
     const randomIndex = Math.floor(Math.random() * languages.length);
     setTargetLanguage(languages[randomIndex]);
     setGameWon(false);
     setGuess("");
     setAttempts(0);
-    setAttributes({
-      paradigm: { value: [], match: "hidden" },
-      typing: { value: "", match: "hidden" },
-      garbageCollection: { value: false, match: "hidden" },
-      designedBy: { value: "", match: "hidden" },
-      firstAppeared: { value: 0, match: "hidden" },
-      mainUseCase: { value: "", match: "hidden" },
-    });
+    setAttributes(DEFAULT_ATTRIBUTES);
     setCommandHistory(() => [
       { text: "$ ./reset.sh", type: "command" },
       { text: "Resetting game state...", type: "info" },
@@ -146,13 +141,12 @@ export default function ProgrammingLanguageGame() {
       { text: "Game reset complete. Ready for new input.", type: "success" },
     ]);
 
-    // Focus the input after reset
     if (inputRef.current) {
       inputRef.current.focus();
     }
   }
 
-  const handleGuess = () => {
+  function handleGuess(): void {
     if (!guess.trim()) return;
 
     const currentGuess = guess.trim();
@@ -163,10 +157,9 @@ export default function ProgrammingLanguageGame() {
       { text: `$ execute --lang="${currentGuess}"`, type: "command" },
     ]);
 
-    // Check if guess is correct
     if (currentGuess.toLowerCase() === targetLanguage?.name.toLowerCase()) {
       setGameWon(true);
-      // Reveal all attributes as exact matches
+
       const newAttributes = { ...attributes };
       Object.keys(newAttributes).forEach((key) => {
         newAttributes[key] = {
@@ -176,6 +169,7 @@ export default function ProgrammingLanguageGame() {
         };
       });
       setAttributes(newAttributes);
+
       setCommandHistory((prev) => [
         ...prev,
         {
@@ -184,10 +178,10 @@ export default function ProgrammingLanguageGame() {
         },
         { text: "SUCCESS: All properties verified ✓", type: "success" },
       ]);
+
       return;
     }
 
-    // Find the guessed language
     const guessedLanguage = languages.find(
       (lang) => lang.name.toLowerCase() === currentGuess.toLowerCase(),
     );
@@ -201,7 +195,9 @@ export default function ProgrammingLanguageGame() {
         },
         { text: "Try another language identifier.", type: "warning" },
       ]);
+
       setGuess("");
+
       return;
     }
 
@@ -286,9 +282,9 @@ export default function ProgrammingLanguageGame() {
       { text: "Analysis complete. Try another language.", type: "info" },
     ]);
     setGuess("");
-  };
+  }
 
-  const getMatchColor = (match: AttributeMatch) => {
+  function getMatchColor(match: AttributeMatch): string {
     switch (match) {
       case "exact":
         return "text-green-500";
@@ -299,11 +295,11 @@ export default function ProgrammingLanguageGame() {
       default:
         return "text-gray-500";
     }
-  };
+  }
 
-  const getTerminalTextColor = (
+  function getTerminalTextColor(
     type: "command" | "error" | "success" | "info" | "warning",
-  ) => {
+  ): string {
     switch (type) {
       case "command":
         return "text-green-500 drop-shadow-[0_0_5px_rgba(34,197,94)]";
@@ -317,14 +313,17 @@ export default function ProgrammingLanguageGame() {
       default:
         return "text-gray-300";
     }
-  };
+  }
 
-  const formatValue = (value: string | number | boolean | string[]) => {
+  function formatValue(value: string | number | boolean | string[]) {
     if (Array.isArray(value)) return `[${value.join(", ")}]`;
+
     if (typeof value === "boolean") return value ? "true" : "false";
+
     if (typeof value === "string") return `"${value}"`;
+
     return value.toString();
-  };
+  }
 
   return (
     <div className="relative min-h-screen bg-[#090909] font-mono text-green-400">
