@@ -1,0 +1,56 @@
+export const siteConfig = {
+  name: "language_guesser.sh",
+};
+
+export const languages = [
+  {
+    name: "JavaScript",
+    year: 1995,
+    paradigm: ["Object-oriented", "Functional", "Event-driven"],
+    typing: "Dynamic",
+    garbageCollection: true,
+    designedBy: "Brendan Eich",
+    firstAppeared: 1995,
+    mainUseCase: "Web",
+  },
+  {
+    name: "Python",
+    year: 1991,
+    paradigm: ["Object-oriented", "Functional", "Imperative"],
+    typing: "Dynamic",
+    garbageCollection: true,
+    designedBy: "Guido van Rossum",
+    firstAppeared: 1991,
+    mainUseCase: "General-purpose",
+  },
+  {
+    name: "Rust",
+    year: 2010,
+    paradigm: ["Multi-paradigm", "Concurrent"],
+    typing: "Static",
+    garbageCollection: false,
+    designedBy: "Graydon Hoare",
+    firstAppeared: 2010,
+    mainUseCase: "Systems",
+  },
+  {
+    name: "Go",
+    year: 2009,
+    paradigm: ["Concurrent", "Imperative", "Structured"],
+    typing: "Static",
+    garbageCollection: true,
+    designedBy: "Robert Griesemer, Rob Pike, Ken Thompson",
+    firstAppeared: 2009,
+    mainUseCase: "Systems",
+  },
+  {
+    name: "TypeScript",
+    year: 2012,
+    paradigm: ["Object-oriented", "Functional"],
+    typing: "Static",
+    garbageCollection: true,
+    designedBy: "Anders Hejlsberg",
+    firstAppeared: 2012,
+    mainUseCase: "Web",
+  },
+];
