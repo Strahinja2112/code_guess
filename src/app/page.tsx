@@ -4,7 +4,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
-import { Check, RefreshCw, Terminal, X } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  Check,
+  RefreshCw,
+  Terminal,
+  X,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 // Sample data - in a real app, this would come from a database or API
@@ -66,15 +73,107 @@ type AttributeMatch = "exact" | "close" | "wrong" | "hidden";
 interface AttributeState {
   value: string | number | boolean | string[];
   match: AttributeMatch;
+  direction?: "up" | "down" | null; // For numeric values like year
 }
 
+// Matrix Rain Effect Component
+// function MatrixRain() {
+//   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+//   useEffect(() => {
+//     const canvas = canvasRef.current;
+//     if (!canvas) return;
+
+//     const ctx = canvas.getContext("2d");
+//     if (!ctx) return;
+
+//     // Set canvas dimensions
+//     const resizeCanvas = () => {
+//       canvas.width = window.innerWidth;
+//       canvas.height = window.innerHeight;
+//     };
+
+//     resizeCanvas();
+//     window.addEventListener("resize", resizeCanvas);
+
+//     // Matrix characters (using a mix of katakana, latin and digits)
+//     const chars =
+//       "アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+//     const charArray = chars.split("");
+
+//     // Create drops
+//     const fontSize = 14;
+//     const columns = Math.floor(canvas.width / fontSize);
+//     const drops: number[] = [];
+
+//     // Initialize drops
+//     for (let i = 0; i < columns; i++) {
+//       drops[i] = Math.floor(Math.random() * -canvas.height);
+//     }
+
+//     // Drawing function
+//     const draw = () => {
+//       // Add semi-transparent black rectangle on top of previous frame
+//       ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+//       ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+//       // Set text color and font
+//       ctx.fillStyle = "#0F0"; // Bright green
+//       ctx.font = `${fontSize}px monospace`;
+
+//       // Draw characters
+//       for (let i = 0; i < drops.length; i++) {
+//         // Random character
+//         const char = charArray[Math.floor(Math.random() * charArray.length)];
+
+//         // Draw character
+//         const x = i * fontSize;
+//         const y = drops[i] * fontSize;
+
+//         // Add glow effect
+//         ctx.shadowColor = "#0F0";
+//         ctx.shadowBlur = 10;
+//         ctx.fillText(char, x, y);
+//         ctx.shadowBlur = 0;
+
+//         // Move drop down
+//         drops[i]++;
+
+//         // Reset drop if it reaches bottom or randomly
+//         if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+//           drops[i] = Math.floor(Math.random() * -20);
+//         }
+//       }
+//     };
+
+//     // Animation loop
+//     const interval = setInterval(draw, 50);
+
+//     return () => {
+//       clearInterval(interval);
+//       window.removeEventListener("resize", resizeCanvas);
+//     };
+//   }, []);
+
+//   return (
+//     <canvas
+//       ref={canvasRef}
+//       className="fixed left-0 top-0 -z-10 h-full w-full opacity-20"
+//     />
+//   );
+// }
+
 export default function ProgrammingLanguageGame() {
-  const [darkMode, setDarkMode] = useState(true);
   const [guess, setGuess] = useState("");
   const [targetLanguage, setTargetLanguage] = useState(languages[0]);
   const [gameWon, setGameWon] = useState(false);
   const [attempts, setAttempts] = useState(0);
-  const [commandHistory, setCommandHistory] = useState<string[]>([]);
+  const [commandHistory, setCommandHistory] = useState<
+    {
+      text: string;
+      type: "command" | "error" | "success" | "info" | "warning";
+    }[]
+  >([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
   const [attributes, setAttributes] = useState<Record<string, AttributeState>>({
@@ -93,21 +192,18 @@ export default function ProgrammingLanguageGame() {
     startNewGame();
     // Add initial terminal messages
     setCommandHistory([
-      "$ ./language-guesser",
-      "Initializing language database...",
-      "Loading game module...",
-      "Ready. Type a language name and press Enter to execute.",
+      { text: "$ ./language-guesser", type: "command" },
+      { text: "Initializing language database...", type: "info" },
+      { text: "Loading game module...", type: "info" },
+      {
+        text: "Ready. Type a language name and press Enter to execute.",
+        type: "success",
+      },
     ]);
-  }, []);
 
-  // Toggle dark mode class on body
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [darkMode]);
+    // Adding class to body element
+    document.documentElement.classList.add("dark");
+  }, []);
 
   useEffect(() => {
     // Smooth scroll to the bottom when command history changes
@@ -130,12 +226,11 @@ export default function ProgrammingLanguageGame() {
       firstAppeared: { value: 0, match: "hidden" },
       mainUseCase: { value: "", match: "hidden" },
     });
-    setCommandHistory((prev) => [
-      ...prev,
-      "$ ./reset.sh",
-      "Resetting game state...",
-      "Selecting new random language...",
-      "Game reset complete. Ready for new input.",
+    setCommandHistory(() => [
+      { text: "$ ./reset.sh", type: "command" },
+      { text: "Resetting game state...", type: "info" },
+      { text: "Selecting new random language...", type: "info" },
+      { text: "Game reset complete. Ready for new input.", type: "success" },
     ]);
 
     // Focus the input after reset
@@ -151,11 +246,12 @@ export default function ProgrammingLanguageGame() {
     setAttempts(attempts + 1);
     setCommandHistory((prev) => [
       ...prev,
-      `$ execute --lang="${currentGuess}"`,
+      { text: "", type: "command" },
+      { text: `$ execute --lang="${currentGuess}"`, type: "command" },
     ]);
 
     // Check if guess is correct
-    if (currentGuess.toLowerCase() === targetLanguage.name.toLowerCase()) {
+    if (currentGuess.toLowerCase() === targetLanguage?.name.toLowerCase()) {
       setGameWon(true);
       // Reveal all attributes as exact matches
       const newAttributes = { ...attributes };
@@ -163,13 +259,17 @@ export default function ProgrammingLanguageGame() {
         newAttributes[key] = {
           value: targetLanguage[key as keyof typeof targetLanguage],
           match: "exact",
+          direction: null,
         };
       });
       setAttributes(newAttributes);
       setCommandHistory((prev) => [
         ...prev,
-        `Match found! Language identified: ${targetLanguage.name}`,
-        "SUCCESS: All properties verified ✓",
+        {
+          text: `Match found! Language identified: ${targetLanguage.name}`,
+          type: "success",
+        },
+        { text: "SUCCESS: All properties verified ✓", type: "success" },
       ]);
       return;
     }
@@ -182,8 +282,11 @@ export default function ProgrammingLanguageGame() {
     if (!guessedLanguage) {
       setCommandHistory((prev) => [
         ...prev,
-        `ERROR: Language "${currentGuess}" not found in database.`,
-        "Try another language identifier.",
+        {
+          text: `ERROR: Language "${currentGuess}" not found in database.`,
+          type: "error",
+        },
+        { text: "Try another language identifier.", type: "warning" },
       ]);
       setGuess("");
       return;
@@ -191,13 +294,17 @@ export default function ProgrammingLanguageGame() {
 
     // Update attributes based on the guess
     const newAttributes = { ...attributes };
-    const matchResults: string[] = [];
+    const matchResults: {
+      text: string;
+      type: "success" | "warning" | "error" | "info";
+    }[] = [];
 
     // Always reveal attributes, but with different match states
     Object.keys(newAttributes).forEach((key) => {
-      const targetValue = targetLanguage[key as keyof typeof targetLanguage];
+      const targetValue = targetLanguage?.[key as keyof typeof targetLanguage];
       const guessedValue = guessedLanguage[key as keyof typeof guessedLanguage];
       let matchState: AttributeMatch = "wrong";
+      let direction: "up" | "down" | null = null;
 
       if (Array.isArray(targetValue) && Array.isArray(guessedValue)) {
         // For arrays like paradigm, check for any overlapping values
@@ -216,26 +323,54 @@ export default function ProgrammingLanguageGame() {
             : diff <= 5
               ? "close"
               : "wrong";
+
+        // Add direction for years
+        if (Number(guessedValue) < Number(targetValue)) {
+          direction = "up"; // Guessed too low, need to go up
+        } else if (Number(guessedValue) > Number(targetValue)) {
+          direction = "down"; // Guessed too high, need to go down
+        }
       } else {
         // For simple values
         matchState = targetValue === guessedValue ? "exact" : "wrong";
       }
 
-      newAttributes[key] = { value: targetValue, match: matchState };
+      newAttributes[key] = {
+        value: targetValue ?? "",
+        match: matchState,
+        direction,
+      };
 
       // Add to match results for terminal output
       const formattedKey = key.replace(/([A-Z])/g, "_$1").toLowerCase();
-      const matchSymbol =
+      let matchSymbol =
         matchState === "exact" ? "✓" : matchState === "close" ? "≈" : "✗";
-      matchResults.push(`${formattedKey}: ${matchSymbol}`);
+
+      // Add direction indicators to terminal output for years
+      if (key === "firstAppeared" && direction) {
+        matchSymbol += direction === "up" ? " ↑" : " ↓";
+      }
+
+      let resultType: "success" | "warning" | "error" | "info" = "info";
+      if (matchState === "exact") resultType = "success";
+      else if (matchState === "close") resultType = "warning";
+      else if (matchState === "wrong") resultType = "error";
+
+      matchResults.push({
+        text: `${formattedKey}: ${matchSymbol}`,
+        type: resultType,
+      });
     });
 
     setAttributes(newAttributes);
     setCommandHistory((prev) => [
       ...prev,
-      `Comparing properties of "${currentGuess}" with target language:`,
+      {
+        text: `Comparing properties of "${currentGuess}" with target language:`,
+        type: "info",
+      },
       ...matchResults,
-      "Analysis complete. Try another language.",
+      { text: "Analysis complete. Try another language.", type: "info" },
     ]);
     setGuess("");
   };
@@ -243,13 +378,31 @@ export default function ProgrammingLanguageGame() {
   const getMatchColor = (match: AttributeMatch) => {
     switch (match) {
       case "exact":
-        return "text-green-500 dark:text-green-400";
+        return "text-green-500";
       case "close":
-        return "text-yellow-500 dark:text-yellow-400";
+        return "text-yellow-500";
       case "wrong":
-        return "text-red-500 dark:text-red-400";
+        return "text-red-500";
       default:
-        return "text-gray-500 dark:text-gray-400";
+        return "text-gray-500";
+    }
+  };
+
+  const getTerminalTextColor = (
+    type: "command" | "error" | "success" | "info" | "warning",
+  ) => {
+    switch (type) {
+      case "command":
+        return "text-green-500 drop-shadow-[0_0_5px_rgba(34,197,94)]";
+      case "error":
+        return "text-red-500";
+      case "success":
+        return "text-green-400";
+      case "warning":
+        return "text-yellow-400";
+      case "info":
+      default:
+        return "text-gray-300";
     }
   };
 
@@ -261,47 +414,39 @@ export default function ProgrammingLanguageGame() {
   };
 
   return (
-    <div className="min-h-screen bg-[#1e1e1e] font-mono text-gray-300 dark:bg-[#1e1e1e]">
-      <div className="container mx-auto max-w-4xl px-5 py-8">
-        <div className="mb-5 flex items-center justify-between border-b border-gray-700 pb-3">
+    <div className="relative min-h-screen bg-[#090909] font-mono text-green-400">
+      {/* <MatrixRain /> */}
+      <div className="container relative z-10 mx-auto max-w-4xl px-5 py-8">
+        <div className="mb-5 flex items-center justify-between border-b border-green-900 pb-3">
           <div className="flex items-center">
-            <Terminal className="mr-2 h-6 w-6 text-green-500" />
-            <h1 className="text-xl font-bold text-green-500">
+            <Terminal className="mr-2 size-8 text-green-500" />
+            <h1 className="text-3xl font-bold text-green-500 drop-shadow-[0_0_5px_rgba(44,197,94,0.5)]">
               language_guesser.sh
             </h1>
           </div>
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              onClick={startNewGame}
-              className="border-gray-700 text-gray-300 hover:bg-gray-800"
-            >
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Reset
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => setDarkMode(!darkMode)}
-              className="border-gray-700 text-gray-300 hover:bg-gray-800"
-            >
-              {darkMode ? "Light Theme" : "Dark Theme"}
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            onClick={startNewGame}
+            className="border-green-900 text-green-400 hover:bg-green-900/30 hover:text-green-300"
+          >
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Reset
+          </Button>
         </div>
 
         {/* Terminal output area */}
-        <div className="mb-5 overflow-hidden rounded-md border border-gray-700 bg-[#252526] shadow-md">
-          <div className="flex items-center justify-between bg-[#333333] px-4 py-1.5 text-sm">
-            <span>TERMINAL</span>
+        <div className="mb-5 overflow-hidden rounded-md border border-green-900 bg-[#0f0f0f] shadow-[0_0_10px_rgba(34,197,94,0.2)]">
+          <div className="flex items-center justify-between border-b border-green-900/50 bg-[#111111] px-4 py-1.5 text-sm">
+            <span className="text-green-500">TERMINAL</span>
             <div className="flex gap-1.5">
-              <span className="h-3.5 w-3.5 rounded-full bg-red-500"></span>
-              <span className="h-3.5 w-3.5 rounded-full bg-yellow-500"></span>
-              <span className="h-3.5 w-3.5 rounded-full bg-green-500"></span>
+              <span className="h-3.5 w-3.5 rounded-full bg-red-800"></span>
+              <span className="h-3.5 w-3.5 rounded-full bg-yellow-800"></span>
+              <span className="h-3.5 w-3.5 rounded-full bg-green-800"></span>
             </div>
           </div>
           <div
             ref={terminalRef}
-            className="hide-scrollbar h-56 overflow-y-scroll p-5 font-mono text-sm"
+            className="hide-scrollbar h-72 overflow-y-scroll bg-[#0a0a0a] p-5 font-mono text-sm"
           >
             {commandHistory.map((line, index) => (
               <div
@@ -309,21 +454,23 @@ export default function ProgrammingLanguageGame() {
                 ref={
                   index === commandHistory.length - 1 ? lastMessageRef : null
                 }
-                className={`mb-1.5 ${line.startsWith("$") ? "text-green-400" : ""}`}
+                className={`mb-1.5 ${getTerminalTextColor(line.type)}`}
               >
-                {line}
+                {line.text}
               </div>
             ))}
           </div>
         </div>
 
         {/* Input area */}
-        <div className="mb-6 overflow-hidden rounded-md border border-gray-700 bg-[#252526] shadow-md">
-          <div className="bg-[#333333] px-4 py-1.5 text-sm">
-            <span>INPUT</span>
+        <div className="mb-6 overflow-hidden rounded-md border border-green-900 bg-[#0f0f0f] shadow-[0_0_10px_rgba(34,197,94,0.2)]">
+          <div className="border-b border-green-900/50 bg-[#111111] px-4 py-1.5 text-sm">
+            <span className="text-green-500">INPUT</span>
           </div>
-          <div className="flex items-center p-3">
-            <span className="mr-2 text-base text-green-500">$</span>
+          <div className="flex items-center bg-[#0a0a0a] p-3">
+            <span className="mr-2 text-base text-green-500 drop-shadow-[0_0_2px_rgba(34,197,94,0.5)]">
+              $
+            </span>
             <Input
               ref={inputRef}
               type="text"
@@ -331,12 +478,12 @@ export default function ProgrammingLanguageGame() {
               value={guess}
               onChange={(e) => setGuess(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleGuess()}
-              className="flex-1 border-0 bg-transparent py-4 text-xs text-gray-300 focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="flex-1 border-0 bg-transparent py-4 text-xs text-green-400 placeholder:text-green-900 focus-visible:ring-0 focus-visible:ring-offset-0"
               disabled={gameWon}
             />
             <Button
               onClick={handleGuess}
-              className="ml-3 bg-green-700 px-5 text-white hover:bg-green-800"
+              className="ml-3 border border-green-800 bg-green-900/50 px-5 text-green-400 hover:bg-green-800 hover:text-green-300"
               disabled={gameWon}
             >
               Execute
@@ -345,14 +492,14 @@ export default function ProgrammingLanguageGame() {
         </div>
 
         {/* Code-like attribute display */}
-        <div className="overflow-hidden rounded-md border border-gray-700 bg-[#252526] shadow-md">
-          <div className="flex items-center justify-between bg-[#333333] px-4 py-1.5 text-sm">
-            <span>LANGUAGE_PROPERTIES.json</span>
-            <span className="text-gray-500">Read-only</span>
+        <div className="overflow-hidden rounded-md border border-green-900 bg-[#0f0f0f] shadow-[0_0_10px_rgba(34,197,94,0.2)]">
+          <div className="flex items-center justify-between border-b border-green-900/50 bg-[#111111] px-4 py-1.5 text-sm">
+            <span className="text-green-500">LANGUAGE_PROPERTIES.json</span>
+            <span className="text-green-900">Read-only</span>
           </div>
-          <div className="p-5 font-mono text-base">
+          <div className="bg-[#0a0a0a] p-5 font-mono text-base">
             <div className="flex">
-              <div className="mr-5 select-none text-right text-gray-500">
+              <div className="mr-5 select-none text-right text-green-900">
                 {Array.from({ length: Object.keys(attributes).length + 2 }).map(
                   (_, i) => (
                     <div key={i} className="leading-relaxed">
@@ -362,9 +509,9 @@ export default function ProgrammingLanguageGame() {
                 )}
               </div>
               <div className="flex-1">
-                <div className="leading-relaxed text-blue-400">{"{"}</div>
+                <div className="leading-relaxed text-green-600">{"{"}</div>
                 {Object.entries(attributes).map(
-                  ([key, { value, match }], index) => (
+                  ([key, { value, match, direction }], index) => (
                     <motion.div
                       key={key}
                       initial={{ opacity: 0 }}
@@ -372,31 +519,43 @@ export default function ProgrammingLanguageGame() {
                       transition={{ duration: 0.3, delay: index * 0.1 }}
                       className="ml-6 flex items-center leading-relaxed"
                     >
-                      <span className="text-cyan-400">{`"${key}"`}</span>
-                      <span className="mx-1.5 text-white">:</span>
+                      <span className="text-cyan-500">{`"${key}"`}</span>
+                      <span className="mx-1.5 text-green-400">:</span>
                       <span className={`${getMatchColor(match)}`}>
                         {match !== "hidden" ? formatValue(value) : '"???"'}
                       </span>
                       {index < Object.keys(attributes).length - 1 && (
-                        <span className="text-white">,</span>
+                        <span className="text-green-400">,</span>
                       )}
-                      <div className="ml-3">
+                      <div className="ml-3 flex items-center">
                         {match === "exact" && (
-                          <Check className="inline h-5 w-5 text-green-500" />
+                          <Check className="inline h-5 w-5 text-green-500 drop-shadow-[0_0_3px_rgba(34,197,94,0.7)]" />
                         )}
                         {match === "close" && (
-                          <Badge className="ml-1.5 bg-yellow-700 px-1.5 text-xs">
+                          <div className="ml-1.5 bg-yellow-900/70 px-1.5 text-xs text-yellow-400">
                             ≈
-                          </Badge>
+                          </div>
                         )}
                         {match === "wrong" && (
-                          <X className="inline h-5 w-5 text-red-500" />
+                          <X className="inline h-5 w-5 text-red-500 drop-shadow-[0_0_3px_rgba(239,68,68,0.7)]" />
                         )}
+
+                        {/* Direction indicators for numeric values */}
+                        {key === "firstAppeared" &&
+                          direction === "up" &&
+                          match !== "exact" && (
+                            <ArrowUp className="ml-1 h-4 w-4 text-blue-400" />
+                          )}
+                        {key === "firstAppeared" &&
+                          direction === "down" &&
+                          match !== "exact" && (
+                            <ArrowDown className="ml-1 h-4 w-4 text-blue-400" />
+                          )}
                       </div>
                     </motion.div>
                   ),
                 )}
-                <div className="leading-relaxed text-blue-400">{"}"}</div>
+                <div className="leading-relaxed text-green-600">{"}"}</div>
               </div>
             </div>
           </div>
@@ -406,13 +565,15 @@ export default function ProgrammingLanguageGame() {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-5 rounded-md border border-green-700 bg-green-900/30 p-4 text-green-400"
+            className="mt-5 rounded-md border border-green-800 bg-green-900/20 p-4 text-green-400 shadow-[0_0_10px_rgba(34,197,94,0.3)]"
           >
             <div className="flex items-center">
-              <Check className="mr-2 h-5 w-5" />
+              <Check className="mr-2 h-5 w-5 text-green-500" />
               <span>
                 Success! Target language identified:{" "}
-                <span className="font-bold">{targetLanguage.name}</span>
+                <span className="font-bold text-green-300 drop-shadow-[0_0_2px_rgba(134,239,172,0.5)]">
+                  {targetLanguage?.name}
+                </span>
               </span>
             </div>
           </motion.div>
