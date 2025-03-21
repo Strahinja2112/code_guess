@@ -5,7 +5,7 @@ import "@/styles/globals.css";
 import { type Metadata } from "next";
 import { SessionProvider } from "next-auth/react";
 
-import { Kode_Mono } from "next/font/google";
+import { DM_Mono, Kode_Mono } from "next/font/google";
 
 const monoFont = Kode_Mono({
   subsets: ["latin"],

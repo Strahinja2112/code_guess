@@ -265,7 +265,7 @@ export default function ProgrammingLanguageGame() {
   ): string {
     switch (type) {
       case "command":
-        return "text-green-500 drop-shadow-[0_0_5px_rgba(34,197,94)]";
+        return "text-green-500 drop-shadow-[0_0_7px_rgba(34,197,94)]";
       case "error":
         return "text-red-500";
       case "success":
@@ -337,6 +337,28 @@ export default function ProgrammingLanguageGame() {
         </div>
       </div>
 
+      {process.env.NODE_ENV === "development" && !gameWon && (
+        <div className="mb-5">Chosen language is: {targetLanguage?.name}</div>
+      )}
+
+      {gameWon && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="my-5 rounded-md border border-green-800 bg-green-900/20 p-4 text-green-400 shadow-[0_0_10px_rgba(34,197,94,0.3)]"
+        >
+          <div className="flex items-center">
+            <Check className="mr-2 h-5 w-5 text-green-500" />
+            <span>
+              Success! Target language identified:{" "}
+              <span className="font-bold text-green-300 drop-shadow-[0_0_2px_rgba(134,239,172,0.5)]">
+                {targetLanguage?.name}
+              </span>
+            </span>
+          </div>
+        </motion.div>
+      )}
+
       {/* Terminal output area */}
       <div className="mb-5 overflow-hidden rounded-md border border-green-900 bg-[#0f0f0f] shadow-[0_0_10px_rgba(34,197,94,0.2)]">
         <div className="flex items-center justify-between border-b border-green-900/50 bg-[#111111] px-4 py-1.5 text-sm">
@@ -360,7 +382,7 @@ export default function ProgrammingLanguageGame() {
               ref={index === commandHistory.length - 1 ? lastMessageRef : null}
               className={`mb-1.5 ${getTerminalTextColor(line.type)}`}
             >
-              {line.text}
+              {line.text === "" ? <br /> : line.text}
             </motion.div>
           ))}
         </div>
@@ -449,11 +471,6 @@ export default function ProgrammingLanguageGame() {
                       {match === "exact" && (
                         <Check className="inline h-5 w-5 text-green-500 drop-shadow-[0_0_3px_rgba(34,197,94,0.7)]" />
                       )}
-                      {/* {match === "close" && (
-                          <Badge className="ml-1.5 bg-transparent px-[5px] text-yellow-700 hover:bg-transparent">
-                            <span className="translate-y-[2px] text-xs">≈</span>
-                          </Badge>
-                        )} */}
                       {match === "wrong" && (
                         <X className="inline h-5 w-5 text-red-500 drop-shadow-[0_0_3px_rgba(239,68,68,0.7)]" />
                       )}
@@ -478,111 +495,6 @@ export default function ProgrammingLanguageGame() {
           </div>
         </div>
       </div>
-
-      {gameWon && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mt-5 rounded-md border border-green-800 bg-green-900/20 p-4 text-green-400 shadow-[0_0_10px_rgba(34,197,94,0.3)]"
-        >
-          <div className="flex items-center">
-            <Check className="mr-2 h-5 w-5 text-green-500" />
-            <span>
-              Success! Target language identified:{" "}
-              <span className="font-bold text-green-300 drop-shadow-[0_0_2px_rgba(134,239,172,0.5)]">
-                {targetLanguage?.name}
-              </span>
-            </span>
-          </div>
-        </motion.div>
-      )}
     </div>
   );
 }
-
-// Matrix Rain Effect Component
-// function MatrixRain() {
-//   const canvasRef = useRef<HTMLCanvasElement>(null);
-
-//   useEffect(() => {
-//     const canvas = canvasRef.current;
-//     if (!canvas) return;
-
-//     const ctx = canvas.getContext("2d");
-//     if (!ctx) return;
-
-//     // Set canvas dimensions
-//     const resizeCanvas = () => {
-//       canvas.width = window.innerWidth;
-//       canvas.height = window.innerHeight;
-//     };
-
-//     resizeCanvas();
-//     window.addEventListener("resize", resizeCanvas);
-
-//     // Matrix characters (using a mix of katakana, latin and digits)
-//     const chars =
-//       "アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-//     const charArray = chars.split("");
-
-//     // Create drops
-//     const fontSize = 14;
-//     const columns = Math.floor(canvas.width / fontSize);
-//     const drops: number[] = [];
-
-//     // Initialize drops
-//     for (let i = 0; i < columns; i++) {
-//       drops[i] = Math.floor(Math.random() * -canvas.height);
-//     }
-
-//     // Drawing function
-//     const draw = () => {
-//       // Add semi-transparent black rectangle on top of previous frame
-//       ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-//       ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-//       // Set text color and font
-//       ctx.fillStyle = "#0F0"; // Bright green
-//       ctx.font = `${fontSize}px monospace`;
-
-//       // Draw characters
-//       for (let i = 0; i < drops.length; i++) {
-//         // Random character
-//         const char = charArray[Math.floor(Math.random() * charArray.length)];
-
-//         // Draw character
-//         const x = i * fontSize;
-//         const y = drops[i] * fontSize;
-
-//         // Add glow effect
-//         ctx.shadowColor = "#0F0";
-//         ctx.shadowBlur = 10;
-//         ctx.fillText(char, x, y);
-//         ctx.shadowBlur = 0;
-
-//         // Move drop down
-//         drops[i]++;
-
-//         // Reset drop if it reaches bottom or randomly
-//         if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-//           drops[i] = Math.floor(Math.random() * -20);
-//         }
-//       }
-//     };
-
-//     // Animation loop
-//     const interval = setInterval(draw, 50);
-
-//     return () => {
-//       clearInterval(interval);
-//       window.removeEventListener("resize", resizeCanvas);
-//     };
-//   }, []);
-
-//   return (
-//     <canvas
-//       ref={canvasRef}
-//       className="fixed left-0 top-0 -z-10 h-full w-full opacity-20"
-//     />
-//   );
-// }

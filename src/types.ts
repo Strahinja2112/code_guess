@@ -12,3 +12,13 @@ export type Command = {
   text: string;
   type: "command" | "error" | "success" | "info" | "warning";
 };
+
+export type Language = {
+  name: string;
+  paradigm: string[];
+  typing: string;
+  garbageCollection: boolean;
+  designedBy: string;
+  firstAppeared: number;
+  mainUseCase: string;
+};
