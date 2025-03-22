@@ -14,5 +14,5 @@ export async function getTodaysLanguagePick(): Promise<string | null> {
     return null;
   }
 
-  return todaysPick.languageName as string;
+  return todaysPick.languageName;
 }

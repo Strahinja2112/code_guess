@@ -86,7 +86,7 @@ export function MainGame({ userDailyTry, todaysLanguage }: Props) {
     return () => {
       void create();
     };
-  }, [gameState]);
+  }, [gameState, session?.user]);
 
   useEffect(() => {
     if (attempts >= MAX_TRIES) {
@@ -96,6 +96,7 @@ export function MainGame({ userDailyTry, todaysLanguage }: Props) {
 
   useEffect(() => {
     startNewGame();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status]);
 
   useEffect(() => {

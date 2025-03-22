@@ -5,12 +5,12 @@ import "@/styles/globals.css";
 import { type Metadata } from "next";
 import { SessionProvider } from "next-auth/react";
 
-import { DM_Mono, Kode_Mono } from "next/font/google";
+import { Kode_Mono } from "next/font/google";
 
 const monoFont = Kode_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
-  weight: ["400"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {

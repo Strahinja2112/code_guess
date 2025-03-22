@@ -1,6 +1,6 @@
 "use server";
 
-import { type DailyTry, type Prisma } from "@prisma/client";
+import { type Prisma } from "@prisma/client";
 import { isSameDay } from "date-fns";
 import { auth } from "./auth";
 import { db } from "./db";
