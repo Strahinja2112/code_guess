@@ -93,12 +93,30 @@ export default function ProgrammingLanguageGame() {
     setGuess("");
     setAttempts(0);
     setAttributes(DEFAULT_ATTRIBUTES);
-    setCommandHistory(() => [
+
+    const newCommandHistory: Command[] = [
       { text: "$ ./reset.sh", type: "command" },
-      { text: "Resetting game state...", type: "info" },
-      { text: "Selecting new random language...", type: "info" },
-      { text: "Game reset complete. Ready for new input.", type: "success" },
-    ]);
+      { text: "Checking your identity...", type: "info" },
+    ];
+
+    if (!session?.user) {
+      newCommandHistory.push({
+        text: "Identity check failure. Please log in to continue.",
+        type: "error",
+      });
+    } else {
+      newCommandHistory.push(
+        {
+          text: `Identity check success. Welcome, ${session.user.name?.split(" ")[0] ?? "User"}!`,
+          type: "success",
+        },
+        { text: "Resetting game state...", type: "info" },
+        { text: "Selecting new random language...", type: "info" },
+        { text: "Game reset complete. Ready for new input.", type: "success" },
+      );
+    }
+
+    setCommandHistory(newCommandHistory);
 
     if (inputRef.current) {
       inputRef.current.focus();

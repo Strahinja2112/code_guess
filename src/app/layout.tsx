@@ -28,12 +28,7 @@ export default function RootLayout({
     >
       <body className="bg-[#090909]">
         <SessionProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
+          <ThemeProvider attribute="class" forcedTheme="dark">
             {children}
           </ThemeProvider>
         </SessionProvider>

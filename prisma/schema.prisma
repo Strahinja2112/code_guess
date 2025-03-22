@@ -63,6 +63,8 @@ model User {
   accounts      Account[]
   sessions      Session[]
   posts         Post[]
+
+  dailyTries DailyTry[]
 }
 
 model VerificationToken {
@@ -71,4 +73,21 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model DailyTry {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  success Boolean
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model LanguagePick {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  language String
 }
