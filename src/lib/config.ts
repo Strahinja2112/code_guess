@@ -4,6 +4,8 @@ export const siteConfig = {
   name: "language_guesser.sh",
 };
 
+export const MAX_TRIES = 6;
+
 export const languages: Language[] = [
   {
     name: "JavaScript",

@@ -89,5 +89,5 @@ model LanguagePick {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
 
-  language String
+  languageName String
 }
