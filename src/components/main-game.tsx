@@ -35,7 +35,7 @@ const DEFAULT_ATTRIBUTES: Record<string, AttributeState> = {
 };
 
 type Props = {
-  todaysLanguage: string | null;
+  todaysLanguage: string;
   userDailyTry?: DailyTry;
 };
 
@@ -376,11 +376,11 @@ export function MainGame({ userDailyTry, todaysLanguage }: Props) {
 
   return (
     <div className="container relative z-10 mx-auto min-h-screen max-w-4xl px-5 py-8 font-mono text-green-400">
-      <div className="mb-5 flex items-center justify-between border-b border-green-900 pb-3">
+      <header className="mb-5 flex items-center justify-between border-b border-green-900 pb-3">
         <div className="flex items-center">
           <Terminal className="mr-2 size-8 text-green-500" />
           <h1 className="text-3xl font-bold text-green-500 drop-shadow-[0_0_5px_rgba(44,197,94,0.5)]">
-            {siteConfig.name}
+            {siteConfig.name}.sh
           </h1>
         </div>
         <div className="space-x-2">
@@ -408,7 +408,7 @@ export function MainGame({ userDailyTry, todaysLanguage }: Props) {
             )}
           </Button>
         </div>
-      </div>
+      </header>
 
       {process.env.NODE_ENV === "development" && gameState === "PLAYING" && (
         <div className="mb-5">Chosen language is: {todaysLanguage}</div>
@@ -433,7 +433,7 @@ export function MainGame({ userDailyTry, todaysLanguage }: Props) {
       )}
 
       {/* Terminal output area */}
-      <div className="mb-5 overflow-hidden rounded-md border border-green-900 bg-[#0f0f0f] shadow-[0_0_10px_rgba(34,197,94,0.2)]">
+      <section className="mb-5 overflow-hidden rounded-md border border-green-900 bg-[#0f0f0f] shadow-[0_0_10px_rgba(34,197,94,0.2)]">
         <div className="flex items-center justify-between border-b border-green-900/50 bg-[#111111] px-4 py-1.5 text-sm">
           <span className="text-green-500">TERMINAL</span>
           <div className="flex gap-1.5">
@@ -459,7 +459,7 @@ export function MainGame({ userDailyTry, todaysLanguage }: Props) {
             </motion.div>
           ))}
         </div>
-      </div>
+      </section>
 
       {/* Input area */}
       <div

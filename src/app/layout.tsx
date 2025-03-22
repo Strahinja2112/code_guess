@@ -1,5 +1,4 @@
 import { ThemeProvider } from "@/components/theme-provider";
-import { siteConfig } from "@/lib/config";
 import "@/styles/globals.css";
 
 import { type Metadata } from "next";
@@ -14,7 +13,7 @@ const monoFont = Kode_Mono({
 });
 
 export const metadata: Metadata = {
-  title: `${siteConfig.name} - Wordle For Programmers`,
+  title: `Wordle For Programmers`,
 };
 
 export default function RootLayout({

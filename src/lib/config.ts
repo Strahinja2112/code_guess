@@ -1,7 +1,7 @@
 import { type Language } from "@/types";
 
 export const siteConfig = {
-  name: "code_guess.sh",
+  name: "code_guess",
 };
 
 export const MAX_TRIES = 6;
