@@ -55,9 +55,11 @@ export function MainGame({ userDailyTry, todaysLanguage }: Props) {
 
   const [attributes, setAttributes] = useState(DEFAULT_ATTRIBUTES);
 
+  const targetLanguage = languages.find((lang) => lang.name === todaysLanguage);
+
   const lastMessageRef = useRef<HTMLDivElement>(null);
 
-  const canUserPlay = userDailyTry && session?.user && gameState === "PLAYING";
+  const canUserPlay = !userDailyTry && session?.user && gameState === "PLAYING";
 
   useEffect(() => {
     async function create() {
@@ -128,7 +130,7 @@ export function MainGame({ userDailyTry, todaysLanguage }: Props) {
       if (!!userDailyTry) {
         newHistory.push({
           text: userDailyTry.success
-            ? ""
+            ? "You have already WON today! Congratulations! See you tomorrow."
             : "You have already played today. Please try again tomorrow.",
           type: userDailyTry.success ? "info" : "error",
         });
@@ -173,13 +175,13 @@ export function MainGame({ userDailyTry, todaysLanguage }: Props) {
       { text: `$ execute --lang="${currentGuess}"`, type: "command" },
     ]);
 
-    if (currentGuess.toLowerCase() === todaysLanguage?.toLowerCase()) {
+    if (currentGuess.toLowerCase() === targetLanguage?.name?.toLowerCase()) {
       setGameState("WON");
 
       const newAttributes = { ...attributes };
       Object.keys(newAttributes).forEach((key) => {
         newAttributes[key] = {
-          value: todaysLanguage,
+          value: targetLanguage[key as keyof typeof targetLanguage],
           match: "exact",
           direction: null,
         };
@@ -189,7 +191,7 @@ export function MainGame({ userDailyTry, todaysLanguage }: Props) {
       setCommandHistory((prev) => [
         ...prev,
         {
-          text: `Match found! Language identified: ${todaysLanguage}`,
+          text: `Match found! Language identified: ${targetLanguage.name}`,
           type: "success",
         },
         { text: "SUCCESS: All properties verified ✓", type: "success" },
@@ -242,7 +244,7 @@ export function MainGame({ userDailyTry, todaysLanguage }: Props) {
     }[] = [];
 
     Object.keys(newAttributes).forEach((key) => {
-      const targetValue = todaysLanguage?.[key as keyof typeof todaysLanguage];
+      const targetValue = targetLanguage?.[key as keyof typeof targetLanguage];
       const guessedValue = guessedLanguage[key as keyof typeof guessedLanguage];
 
       let matchState: AttributeMatch = "wrong";
@@ -276,7 +278,7 @@ export function MainGame({ userDailyTry, todaysLanguage }: Props) {
       }
 
       newAttributes[key] = {
-        value: todaysLanguage ?? "",
+        value: targetValue ?? "",
         match: matchState,
         direction,
       };
@@ -373,7 +375,6 @@ export function MainGame({ userDailyTry, todaysLanguage }: Props) {
 
   return (
     <div className="container relative z-10 mx-auto min-h-screen max-w-4xl px-5 py-8 font-mono text-green-400">
-      <pre>{JSON.stringify({ userDailyTry }, null, 2)}</pre>
       <div className="mb-5 flex items-center justify-between border-b border-green-900 pb-3">
         <div className="flex items-center">
           <Terminal className="mr-2 size-8 text-green-500" />
